@@ -39,6 +39,14 @@ public class ClientController {
 		
 	}
 	
+
+	@RequestMapping(value= "/client/{idClient}/relations", method=RequestMethod.GET)
+	public List<LienRelation> listRelationclient(@PathVariable Integer idClient) {
+		
+		return clientRepository.findAllClientRelationWith(idClient);
+		
+	}
+	
 	@RequestMapping(value="/client", method=RequestMethod.POST)
 	public Client createClient(@RequestBody Client client) {
 		
@@ -46,12 +54,22 @@ public class ClientController {
 		
 		return c;
 	}
-
-	@RequestMapping(value= "/client/{idClient}/relations", method=RequestMethod.GET)
-	public List<LienRelation> listRelationclient(@PathVariable Integer idClient) {
+	
+	@RequestMapping(value="/client/{idClient1}/relation/{idClient2}/{libRelation}", method=RequestMethod.POST)
+	public LienRelation createLienRelation(@PathVariable Integer idClient1,@PathVariable Integer idClient2,@PathVariable String libRelation) {
 		
-		return clientRepository.findAllClientRelationWith(idClient);
+		Client c1 =clientRepository.findClientByidClient(idClient1);
+		Client c2 =clientRepository.findClientByidClient(idClient2);
+		if(c1!=null && c2!=null && libRelation!=null)
+		{
+			LienRelation lr =new LienRelation();
+			lr.setClient1(c1);
+			lr.setClient2(c2);
+			lr.setLibelle(libRelation);
+			return lienRelationRepository.saveAndFlush(lr);			
+		}
 		
+		return null;
 	}
 	
 	@RequestMapping(value= "/client/{idClient}", method=RequestMethod.DELETE)
@@ -105,6 +123,24 @@ public class ClientController {
 		
 		return clientRepository.saveAndFlush(client);
 		
+	}
+	
+	@RequestMapping(value= "/client/{idClient1}/relation/{idClient2}/{libRelation}", method=RequestMethod.PUT)
+	public LienRelation updateRelation(@PathVariable Integer idClient1,@PathVariable Integer idClient2,@PathVariable String libRelation) {		
+		
+		Client c2 =clientRepository.findClientByidClient(idClient2);
+		List<LienRelation> lr1=clientRepository.findAllClientRelationWith(idClient1);
+		
+		
+		for (LienRelation lienRelation : lr1) {
+			if(lienRelation.getClient2().equals(c2))
+			{
+				lienRelation.setLibelle(libRelation);
+				return lienRelationRepository.saveAndFlush(lienRelation);
+			}
+		}
+		
+		return null;
 	}
 
 }
