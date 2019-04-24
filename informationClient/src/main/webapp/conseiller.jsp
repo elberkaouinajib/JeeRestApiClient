@@ -23,10 +23,11 @@
 		        	    $.each(data, function(i, item) {
 		        	        var $tr = $('<tr>').append(
 		        	        	$('<th id="idConseiller">').text(item.idConseiller),
-		        	            $('<td>').text(item.nom+" "+item.prenom),
-		        	            $('<td>').text(item.email),
-		        	            $('<td>').text(item.telephone),
-		        	            $('<td>').text(item.lieuAffectation),
+		        	            $('<td id="nomConseiller">').text(item.nom),
+		        	            $('<td id="prenomConseiller">').text(item.prenom),
+		        	            $('<td id="emailConseiller">').text(item.email),
+		        	            $('<td id="telephoneConseiller">').text(item.telephone),
+		        	            $('<td id="lieuAffectationConseiller">').text(item.lieuAffectation),
 		        	            $('<td>').html( $('<button id="btnConseillerUpdate" type="button" class="btn btn-success">').text("Modifier")),
 		        	            $('<td>').html( $('<button id="btnConseillerDelete" type="button" class="btn btn-danger">').text("supprimer"))
 		        	        ).appendTo('#listConseillers');
@@ -34,6 +35,21 @@
 		        	});
 		        }
 		    });
+		}
+		
+		function ClearForm(){
+			 $("#addConseilleridConseiller").val("");
+			 $("#addConseillerNom").val("");
+			 $("#addConseillerPrenom").val("");
+			 $("#addConseillerEmail").val("");
+			 $("#addConseillerTelephone").val("");
+			 $("#addConseillerAffectation").val("");			
+		}
+		function ResetFormToAdd(){
+			 ClearForm();
+			 $("#btnConseillerCancel").attr("hidden",true);
+			 $("#btnConseillerUpdateFin").attr("hidden",true);
+			 $("#btnConseillerAdd").attr("hidden",false);			
 		}
 	$(document).ready(function () {
 		 GetListeConseillers();
@@ -60,9 +76,47 @@
 			    });
 		 });
 		 
+		 $("#btnConseillerCancel").click(function() {
+			 ResetFormToAdd();			
+		 });
+		 
+		 $("#btnConseillerUpdateFin").click(function() {
+			 var conseiller = new Object();
+			 conseiller.idConseiller =  $("#addConseilleridConseiller").val();
+			 conseiller.nom =  $("#addConseillerNom").val();
+			 conseiller.prenom = $("#addConseillerPrenom").val();
+			 conseiller.email = $("#addConseillerEmail").val();
+			 conseiller.telephone = $("#addConseillerTelephone").val();
+			 conseiller.lieuAffectation = $("#addConseillerAffectation").val();
+			 var jsonConseiller = JSON.stringify(conseiller);
+			 console.log(jsonConseiller)
+			 
+			 $.ajax({ 
+			        type: 'PUT', 
+			        url: 'http://localhost:8080/informationClient/conseiller', 
+			        dataType : 'json',
+			        contentType: 'application/json',
+			        data : jsonConseiller,
+			        success: function (result) { 
+			        	GetListeConseillers();
+						ResetFormToAdd();	
+			        }
+			    });		
+		 });
+		 
 		 $(document).on('click','#btnConseillerUpdate', function(){
-			//Not yet done
-			});
+			 $("#addConseilleridConseiller").val($(this).parent().parent().find("#idConseiller").text());
+			 $("#addConseillerNom").val($(this).parent().parent().find("#nomConseiller").text());
+			 $("#addConseillerPrenom").val($(this).parent().parent().find("#prenomConseiller").text());
+			 $("#addConseillerEmail").val($(this).parent().parent().find("#emailConseiller").text());
+			 $("#addConseillerTelephone").val($(this).parent().parent().find("#telephoneConseiller").text());
+			 $("#addConseillerAffectation").val($(this).parent().parent().find("#lieuAffectationConseiller").text());	
+			 
+			 $("#btnConseillerCancel").attr("hidden",false);
+			 $("#btnConseillerUpdateFin").attr("hidden",false);
+			 $("#btnConseillerAdd").attr("hidden",true);
+			
+		 });
 		 
 		 $(document).on('click','#btnConseillerDelete', function(){
 			 var idConseiller=$(this).parent().parent().find("#idConseiller").text();
@@ -93,7 +147,8 @@
 				  <thead>
 				    <tr>
 				      <th scope="col">#</th>
-				      <th scope="col">Nom Complet</th>
+				      <th scope="col">Nom</th>
+				      <th scope="col">Prenom</th>
 				      <th scope="col">Email</th>
 				      <th scope="col">Telephone</th>
 				      <th scope="col">Affectation</th>
@@ -111,9 +166,12 @@
     <div class="col-sm-4">
     	<h1>Ajouter un conseiller</h1>
 		<form>
+		  <div hidden class="form-group">
+		    <input type="text" class="form-control" id="addConseilleridConseiller">
+		  </div>
 		  <div class="form-group">
 		    <label for="addConseillerNom">Nom</label>
-		    <input type="email" class="form-control" id="addConseillerNom" placeholder="Nom">
+		    <input type="text" class="form-control" id="addConseillerNom" placeholder="Nom">
 		  </div>
 		  <div class="form-group">
 		    <label for="addConseillerPrenom">Prenom</label>
@@ -132,6 +190,8 @@
 		    <input type="text" class="form-control" id="addConseillerAffectation" placeholder="Affectation">
 		  </div>
 		  <button type="button" id="btnConseillerAdd" class="btn btn-primary">Ajouter</button>
+		  <button hidden type="button" id="btnConseillerUpdateFin" class="btn btn-success">Modifier</button>
+		  <button hidden type="button" id="btnConseillerCancel" class="btn btn-primary">Annuler</button>
 		</form>
     </div>
   </div>
